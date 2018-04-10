@@ -1,7 +1,7 @@
 import { HistoryRouter, HashRouter } from 'franxx'
 
-const router = new HashRouter({
-  // basename: '/basic/',
+const router = new HistoryRouter({
+  basename: '/basic/',
 })
 window.router = router
 
