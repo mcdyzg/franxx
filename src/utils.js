@@ -1,13 +1,14 @@
 export const inBrowser = typeof window !== 'undefined'
 
 export const supportPushState = Boolean(
-  inBrowser && window.history && window.history.pushState
+  inBrowser && window.history && window.history.pushState,
 )
 
 // use User Timing api (if present) for more accurate key precision
-const Time = inBrowser && window.performance && window.performance.now ?
-  window.performance :
-  Date
+const Time =
+  inBrowser && window.performance && window.performance.now
+    ? window.performance
+    : Date
 
 let _key = genKey()
 

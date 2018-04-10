@@ -6,18 +6,22 @@ const webpackConfig = require('./webpack.config')
 
 const app = express()
 
-fs.readdirSync('examples').filter(v => !v.endsWith('.js'))
+fs
+  .readdirSync('examples')
+  .filter(v => !v.endsWith('.js'))
   .forEach(v => {
     const handleRequest = (req, res) => {
       res.send(fs.readFileSync(`examples/${v}/index.html`, 'utf8'))
     }
     app.get(`/${v}/*`, handleRequest)
     app.get(`/${v}`, handleRequest)
+    // app.get(`/`, handleRequest)
   })
 
-
-app.use(devMiddleware(webpack(webpackConfig), {
-  publicPath: webpackConfig.output.publicPath
-}))
+app.use(
+  devMiddleware(webpack(webpackConfig), {
+    publicPath: webpackConfig.output.publicPath,
+  }),
+)
 
 app.listen(8000)

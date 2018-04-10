@@ -17,6 +17,23 @@ export default class BaseRouter {
   }
 
   on(pattern, handler) {
+    /**
+    matchit.parse 作用：将/a/b/c/d?===>
+        [{
+            old: "/a/:b/:c/:d?", type: 0, val: "a"
+        },{
+            old: "/a/:b/:c/:d?", type: 1, val: "b"
+        },{
+            old: "/a/:b/:c/:d?", type: 1, val: "c"
+        },{
+            old: "/a/:b/:c/:d?", type: 3, val: "d"
+        }]
+        old - 原始路径
+        0 - static静态路径
+        1 - parameter
+        2 - any/wildcard
+        3 - optional param 可选参数
+    **/
     this.routes.push(matchit.parse(pattern))
     this.handlers[pattern] = handler
     return this
@@ -29,11 +46,24 @@ export default class BaseRouter {
   }
 
   find(path) {
+    /**
+      如果path=/a/1/2/3
+      那么arr=[{
+          old: "/a/:b/:c/:d?", type: 0, val: "a"
+      },{
+          old: "/a/:b/:c/:d?", type: 1, val: "b"
+      },{
+          old: "/a/:b/:c/:d?", type: 1, val: "c"
+      },{
+          old: "/a/:b/:c/:d?", type: 3, val: "d"
+      }]
+      matchit.exec(path, arr)={b: "1", c: "2", d: "3"}
+      **/
     const arr = matchit.match(path, this.routes)
     if (arr.length === 0) return null
     return {
       params: matchit.exec(path, arr),
-      handler: this.handlers[arr[0].old]
+      handler: this.handlers[arr[0].old],
     }
   }
 
@@ -46,6 +76,8 @@ export default class BaseRouter {
   }
 
   getActualPath(path) {
+    // 当使用HistoryRouter时，如果指定了basename，需要将basename从path中删掉
+    // /basic/a/1/2/3 ==>/a/1/2
     const start = path.slice(0, this.basename.length)
     if (start === this.basename) {
       return path.slice(this.basename.length) || '/'
