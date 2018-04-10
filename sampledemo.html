@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>moban</title>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+      <div id='app'></div>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script type="text/javascript">
+    class Router {
+	constructor({ useHash } = {}) {
+		this.useHash = useHash
+		this.routes = []
+		this.handlers = {}
+	}
+	on(path, handler) {
+		this.routes.push(path)
+		this.handlers[path] = handler
+		return this
+	}
+	off(path, handler) {
+		this.routes.filter(item => item !== path)
+		delete this.handlers[path]
+	}
+	runHandler(path) {
+		this.handlers[path] && this.handlers[path]()
+	}
+}
+
+class BrowserRouter extends Router {
+	constructor(props) {
+		super(props)
+	}
+	getPath() {
+		if (this.useHash) {
+			return window.location.hash.slice(1)
+		} else {
+			return window.location.pathname
+		}
+	}
+	push(path) {
+		if (this.useHash) {
+			window.location.hash = path
+		} else {
+			window.history.pushState(null, '', path)
+			this.runHandler(path)
+		}
+	}
+	start() {
+		window.addEventListener(
+			this.useHash ? 'hashchange' : 'popstate',
+			() => {
+				this.runHandler(this.getPath())
+			},
+		)
+		let path = this.getPath()
+		if (path) {
+			this.runHandler(path)
+		} else if (this.useHash) {
+			this.push('/')
+		}
+	}
+}
+var router = new BrowserRouter({
+	useHash: false,
+})
+router
+	.on('/', function() {
+		console.log('到home了')
+		document.getElementById(
+			'app',
+		).innerHTML = `主页<a onclick="router.push('/page1')">跳转到page1</a>`
+	})
+	.on('/page1', function() {
+		console.log('到page1了')
+		document.getElementById('app').innerHTML = 'page1'
+	})
+router.start()
+</script>
+  </body>
+</html>
